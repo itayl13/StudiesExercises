@@ -19,68 +19,63 @@ namespace Ex2
      * 7. Add to BankAccount the operator + so we could use it to directly update the amount of money in the account.
      * 8. Write a method called IsPalindrome which receives an integer and checks whether it is a palindrome.
      */
-    class Answers
+    class Program
     {
         // 1
-        public enum AccountType { Checking, Deposit }
+        enum AccountType { Checking, Deposit }
 
         // 2
-        public struct BankAccount : IComparable<BankAccount>
+        struct BankAccount : IComparable<BankAccount>
         { 
-            public string owner; public int moneyInAccount; public AccountType accType; 
+            internal string owner; 
+            internal int moneyInAccount; 
+            internal AccountType accountType; 
             // Made comparable to easily sort and find minimum/maximum.
             public int CompareTo(BankAccount other)
             {
                 return moneyInAccount.CompareTo(other.moneyInAccount) > 0 ? 1 : -1;
             }
             // 7
-            public static BankAccount operator +(BankAccount acc, int money)
+            public static BankAccount operator +(BankAccount account, int money)
             {
-                BankAccount newAcc = new BankAccount
+                BankAccount newAccount = new BankAccount
                 {
-                    owner = acc.owner,
-                    moneyInAccount = acc.moneyInAccount + money,
-                    accType = acc.accType
+                    owner = account.owner,
+                    moneyInAccount = account.moneyInAccount + money,
+                    accountType = account.accountType
                 };
-                return newAcc;
+                return newAccount;
             }
-
-        }
-
-        // Helping function to print BankAccount elements, a common action.
-        static void PrintAccount(BankAccount acc)
-        {
-            Console.WriteLine("Owner: {0}\nMoney In Account: {1}\nAccount Type: {2}",
-                acc.owner, acc.moneyInAccount, acc.accType);
+            public override string ToString()
+            {
+                return $"Owner: {owner}\nMoney In Account: {moneyInAccount}\nAccount Type: {accountType}";
+            }
         }
 
         // 4
         static int SumOfBalances(params BankAccount[] accounts)
         {
             int sum = 0;
-            foreach (BankAccount acc in accounts)
+            if (accounts == null) return sum;
+            foreach (BankAccount accountElement in accounts)
             {
-                sum += acc.moneyInAccount;
+                sum += accountElement.moneyInAccount;
             }
             return sum;
         }
 
         // 5
-        static void GetRichestAccount(List<BankAccount> accounts)
+        static BankAccount GetRichestAccount(List<BankAccount> accounts)
         {
-            BankAccount richest = accounts.Max();
-            Console.WriteLine("The richest account:");
-            PrintAccount(richest);
+            return accounts.Max();
         }
-        static void GetPoorestAccount(List<BankAccount> accounts)
+        static BankAccount GetPoorestAccount(List<BankAccount> accounts)
         {
-            BankAccount richest = accounts.Min();
-            Console.WriteLine("The poorest account:");
-            PrintAccount(richest);
+            return accounts.Min();
         }
 
         // 6
-        static void AddMoney(ref BankAccount acc, int money) { acc.moneyInAccount += money; }
+        static void AddMoney(ref BankAccount account, int money) { account.moneyInAccount += money; }
 
         // 8
         static bool IsPalindrome(int num)
@@ -97,56 +92,63 @@ namespace Ex2
         {
             // 1 
             AccountType check = AccountType.Checking;
-            AccountType depo = AccountType.Deposit;
+            AccountType deposit = AccountType.Deposit;
             // 3
-            BankAccount account = new BankAccount 
+            BankAccount account0 = new BankAccount 
             {
                 owner = "John Doe",
                 moneyInAccount = 10,
-                accType = AccountType.Checking
+                accountType = AccountType.Checking
             };
-            PrintAccount(account);
+            Console.WriteLine(account0.ToString());
             // Test 4
-            BankAccount acc1 = new BankAccount
+            BankAccount account1 = new BankAccount
             {
                 owner = "1",
                 moneyInAccount = 10,
-                accType = AccountType.Checking
+                accountType = AccountType.Checking
             };
-            BankAccount acc2 = new BankAccount
+            BankAccount account2 = new BankAccount
             {
                 owner = "2",
                 moneyInAccount = 20,
-                accType = AccountType.Checking
+                accountType = AccountType.Checking
             };
-            Console.WriteLine(SumOfBalances(acc1, acc2));
+            Console.WriteLine(SumOfBalances(account1, account2));
+            BankAccount[] noAccounts = null;
+            Console.WriteLine(SumOfBalances(noAccounts));  // If null, returns 0.
             // 5
             int numAccounts = 10;
             List<BankAccount> accounts = new List<BankAccount>();
             for (int i=0; i<numAccounts; i++)
             {
-                BankAccount tempAccount = new BankAccount();
-                tempAccount.owner = $"Owner Number {i + 1}";
-                Random r1 = new Random(i);
-                tempAccount.moneyInAccount = r1.Next(1000);
-                tempAccount.accType = AccountType.Deposit;
+                BankAccount tempAccount = new BankAccount()
+                {
+                    owner = $"Owner Number {i + 1}",
+                    moneyInAccount = new Random(i).Next(1000),
+                    accountType = AccountType.Deposit
+                };
                 accounts.Add(tempAccount);
             }
             Console.WriteLine("Money in accounts before sorting:");
-            foreach (BankAccount bac in accounts) Console.Write($"{bac.moneyInAccount} ");
+            foreach (BankAccount bankAccount in accounts) Console.Write($"{bankAccount.moneyInAccount} ");
             Console.Write("\n");
-            GetRichestAccount(accounts);
-            GetPoorestAccount(accounts);
+            BankAccount richest = GetRichestAccount(accounts);
+            Console.WriteLine("The richest account:");
+            Console.WriteLine(richest.ToString());
+            BankAccount poorest = GetPoorestAccount(accounts);
+            Console.WriteLine("The poorest account:");
+            Console.WriteLine(poorest.ToString());
             accounts.Sort();
             Console.WriteLine("Sorted money in accounts:");
-            foreach (BankAccount bac in accounts) Console.Write($"{bac.moneyInAccount} ");
+            foreach (BankAccount bankAccount in accounts) Console.Write($"{bankAccount.moneyInAccount} ");
             Console.Write("\n");
             // Test 6
-            AddMoney(ref account, 10);
-            PrintAccount(account);
+            AddMoney(ref account0, 10);
+            Console.WriteLine(account0.ToString());
             // Test 7
-            account += 10;
-            PrintAccount(account);
+            account0 += 10;
+            Console.WriteLine(account0.ToString());
             // Test 8
             string s1 = (IsPalindrome(12321) ? "is a palindrome" : "is not a palindrome");
             Console.WriteLine("12321 " + s1);
