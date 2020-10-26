@@ -17,13 +17,12 @@ namespace Ex1
      * How many letters (excluding spaces etc.) are needed to write all the numbers from 1 to 100
      * (excluding 100)?
      */
-    class Answers
+    class Program
     {
         public class Q1
         {
             public void A()
             {
-                bool found = false;
                 /* Boundaries of for loops: First, a cannot be larger than 333, since if so b must be at least 334 
                  * and c must be at least 335, summing up to at least 1001. Second, b cannot be 500 or larger, 
                  * from a similar reason (if so, than b + c > 1000). 
@@ -34,15 +33,12 @@ namespace Ex1
                     for (int b = a + 1; b < 500; b++)
                     {
                         int c = 1000 - a - b;
-                        if (c <= b) continue;
-                        if (a * a + b * b == c * c)
+                        if (b < c && a * a + b * b == c * c)
                         {
                             Console.WriteLine($"{a},{b},{c}");
-                            found = true;
-                            break;
+                            return;
                         }
                     }
-                    if (found) break;
                 }                
             }
             public void B(int n)
@@ -56,8 +52,7 @@ namespace Ex1
                     for (int b = a + 1; b < fln / 2; b++)
                     {
                         int c = n - b - a;
-                        if (b >= c) continue;
-                        if (a * a + b * b == c * c)
+                        if (b < c && a * a + b * b == c * c)
                         {
                             Console.WriteLine($"{a},{b},{c}");
                         }
@@ -69,7 +64,8 @@ namespace Ex1
         {
             public Q2(string[] strs)
             {
-                var counts = new Dictionary<string, int>();
+                if (strs == null) return;
+                Dictionary<string, int> counts = new Dictionary<string, int>();
                 foreach (string s in strs)
                 {
                     if (counts.ContainsKey(s))
