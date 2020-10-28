@@ -26,7 +26,7 @@ namespace Ex2
 
         // 2
         struct BankAccount : IComparable<BankAccount>
-        { 
+        {
             internal string owner; 
             internal int moneyInAccount; 
             internal AccountType accountType; 
@@ -100,7 +100,7 @@ namespace Ex2
                 moneyInAccount = 10,
                 accountType = AccountType.Checking
             };
-            Console.WriteLine(account0.ToString());
+            Console.WriteLine(account0);
             // Test 4
             BankAccount account1 = new BankAccount
             {
@@ -135,20 +135,20 @@ namespace Ex2
             Console.Write("\n");
             BankAccount richest = GetRichestAccount(accounts);
             Console.WriteLine("The richest account:");
-            Console.WriteLine(richest.ToString());
+            Console.WriteLine(richest);
             BankAccount poorest = GetPoorestAccount(accounts);
             Console.WriteLine("The poorest account:");
-            Console.WriteLine(poorest.ToString());
+            Console.WriteLine(poorest);
             accounts.Sort();
             Console.WriteLine("Sorted money in accounts:");
             foreach (BankAccount bankAccount in accounts) Console.Write($"{bankAccount.moneyInAccount} ");
             Console.Write("\n");
             // Test 6
             AddMoney(ref account0, 10);
-            Console.WriteLine(account0.ToString());
+            Console.WriteLine(account0);
             // Test 7
             account0 += 10;
-            Console.WriteLine(account0.ToString());
+            Console.WriteLine(account0);
             // Test 8
             string s1 = (IsPalindrome(12321) ? "is a palindrome" : "is not a palindrome");
             Console.WriteLine("12321 " + s1);
