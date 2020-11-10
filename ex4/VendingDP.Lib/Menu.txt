@@ -1,0 +1,23 @@
+Basic Products: (Tab delimited: Name, Price, Category)
+Coffee		5	Drinks
+Chocolate		4	Drinks
+White Bread	8	Sandwiches
+Dark Bread		7	Sandwiches
+Brown Bread	9	Sandwiches
+
+Toppings: (Tab delimited: Name, Price, Category)
+Milk			1	Drinks
+Soy			1.5	Drinks
+Cream			0.5	Drinks
+Sugar			0.5	Drinks
+Vegetables		2	Sandwiches
+Egg Salad		3	Sandwiches
+Yellow Cheese	2.5	Sandwiches
+
+Prepared Combinations: (Tab delimited: Name, Basic Product Name, Toppings)
+Lactose Free Coffee	Coffee		1 Soy + 2 Sugar
+Alpine Hot Cocoa		Chocolate		2 Milk + 1 Cream + 1 Sugar
+Latte				Coffee		2 Milk
+Gavnatz			White Bread	1 Yellow Cheese
+Healthy			Dark Bread	2 Vegetables
+Wedding Sandwich		Brown Bread	1 Yellow Cheese + 1 Egg Salad + 1 Vegetables
