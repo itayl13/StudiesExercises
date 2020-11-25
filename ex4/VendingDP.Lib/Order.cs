@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 
 namespace VendingDP.Lib
@@ -7,67 +6,66 @@ namespace VendingDP.Lib
     public class Order
     {
         private readonly List<CombinatedProduct> products;
+        private readonly ItemDetectors itemDetectors = new ItemDetectors();
+        private readonly ErrorHandler errorHandler = new ErrorHandler();
         public float Price { get; set; }
-        public string Menu { get; set; }
-        public Order()
+        public Menu Menu { get; set; }
+        public Order(Menu menu)
         {
+            Menu = menu;
             products = new List<CombinatedProduct>();
         }
 
-        private void HandleSameCategoryExistingProduct(CombinatedProduct product)
+        private void HandleSameCategoryExistingProduct(string productCategory)
         {
-            // Find if there's another product in making that is of the same category as `product`. 
-            // If so, move it to the finished product. Otherwise, no problem and continue as usual:
-            try
+            CombinatedProduct matchingProductInMaking = products
+                .Find(combinatedProduct => combinatedProduct.CombinatedProductStatus == CombinatedProductStatus.InMaking && 
+                combinatedProduct.basicProduct.Category == productCategory);
+            if (matchingProductInMaking != null)
             {
-                CombinatedProduct matchingProductInMaking = products
-                .Find(combinatedProduct => combinatedProduct.CombinatedProductStatus == CombinatedProductStatus.InMaking &&
-                combinatedProduct.basicProduct.productCategory == product.basicProduct.productCategory);
                 matchingProductInMaking.CombinatedProductStatus = CombinatedProductStatus.Made;
             }
-            catch (NullReferenceException) { }
         }
         public void OrderProduct(string productName)
         {
-            try
+            CombinatedProduct product = itemDetectors.DetectProduct(productName);
+            if (product != null) 
             {
-                CombinatedProduct product = ItemDetectors.DetectProduct(productName);
                 if (product.CombinatedProductStatus == CombinatedProductStatus.InMaking)
                 {
-                    HandleSameCategoryExistingProduct(product);
+                    HandleSameCategoryExistingProduct(product.basicProduct.Category);
                 }
                 products.Add(product);
                 Price += product.Price;
             }
-            catch (KeyNotFoundException ex)
+            else
             {
-                ErrorHandler.ItemNotFound(ex.Message, "Product");
+                errorHandler.ItemNotFound(productName, "Product");
             }
         }
         public void AddTopping(string toppingName, int quantity = 1)
         {
+            if (errorHandler.CheckToppingPositivity(quantity))
             {
-                try
+                Item topping = itemDetectors.DetectTopping(toppingName);
+                if (topping != null)
                 {
-                    ErrorHandler.CheckToppingPositivity(quantity);
-                    Topping topping = ItemDetectors.DetectTopping(toppingName);
                     CombinatedProduct productForTopping = products
-                        .First(product => product.CombinatedProductStatus == CombinatedProductStatus.InMaking && 
-                        product.basicProduct.productCategory == topping.toppingFor);
-                    productForTopping.AddTopping(topping, quantity);
-                    Price += quantity * topping.Price;
+                            .Find(product => product.CombinatedProductStatus == CombinatedProductStatus.InMaking &&
+                            product.basicProduct.Category == topping.Category);
+                    if (productForTopping != null)
+                    {
+                        productForTopping.AddTopping(topping, quantity);
+                        Price += quantity * topping.Price;
+                    }
+                    else
+                    {
+                        errorHandler.NoProductToAddToppingTo(toppingName);
+                    }
                 }
-                catch (ArgumentOutOfRangeException ex)
+                else
                 {
-                    ErrorHandler.NonPositiveQuantity(ex.Message);
-                }
-                catch (KeyNotFoundException ex)
-                {
-                    ErrorHandler.ItemNotFound(ex.Message, "Topping");
-                }
-                catch (InvalidOperationException)
-                {
-                    ErrorHandler.NoProductToAddToppingTo(toppingName);
+                    errorHandler.ItemNotFound(toppingName, "Topping");
                 }
             }
         }
@@ -77,8 +75,6 @@ namespace VendingDP.Lib
             {
                 product.CombinatedProductStatus = CombinatedProductStatus.Made;
             }
-            // I guess in real life a RequestPayment method would've been here before cleaning. Here I just clear.
-            products.Clear();
         }
         public override string ToString() 
         {

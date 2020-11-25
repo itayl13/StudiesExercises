@@ -1,73 +1,101 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace VendingDP.Lib
 {
     public class CommandExecutor
+    {
+        private const string HELLO = "Hello! What would you like to order?";
+        private const string UNKNOWN = "Unknown Command";
+        private const string END_EMPTY_ORDER = "Ending an empty order. This has no effect.";
+        public void Introduce()
         {
-            internal string hello = "Hello! What would you like to order?";
-            internal string possibleCommands = "Possible commands: ShowMenu, ShowOrder, EndOrder, Order [productName], Add [toppingName] [quantity = 1].\n" +
-                "Command to end the program: Quit\nCommand to show possible commands: ShowCommands";
-            public void Introduce()
+            Console.WriteLine(HELLO);
+            PrintPossibleCommands();
+        }
+        public void Execute(string command, ref Order currentOrder)
+        {
+            string firstWordOfCommand = FirstWordOfCommand(command);
+            if (Enum.TryParse(firstWordOfCommand, ignoreCase: true, out PossibleCommands commandName))
             {
-                Console.WriteLine(hello + "\n" + possibleCommands);
-            }
-            public void Execute(string command, ref Order currentOrder)
-            {
-            if (command == "ShowMenu")
-            {
-                Console.WriteLine(currentOrder.Menu);
-            }
-            else if (command == "ShowOrder")
-            {
-                Console.WriteLine(currentOrder);
-            }
-            else if (command == "EndOrder")
-            {
-                if (currentOrder.Price > 0)
+                switch (commandName)
                 {
-                    currentOrder.EndOrder();
-                    Console.WriteLine(currentOrder);
-                    currentOrder = new Order() { Menu = currentOrder.Menu };
-                    Console.WriteLine("\n" + hello);
+                    case PossibleCommands.ShowMenu:
+                        Console.WriteLine(currentOrder.Menu);
+                        break;
+                    case PossibleCommands.ShowOrder:
+                        Console.WriteLine(currentOrder);
+                        break;
+                    case PossibleCommands.EndOrder:
+                        {
+                            if (currentOrder.Price > 0)
+                            {
+                                currentOrder.EndOrder();
+                                Console.WriteLine(currentOrder);
+                                currentOrder = new Order(menu: currentOrder.Menu);
+                                Console.WriteLine("\n" + HELLO);
+                            }
+                            else
+                            {
+                                Console.WriteLine(END_EMPTY_ORDER);
+                            }
+                            break;
+                        }
+                    case PossibleCommands.Order:
+                        string productName = Regex.Match(command, @"(?i)(?<=Order).*").ToString().Trim();
+                        currentOrder.OrderProduct(productName);
+                        break;
+                    case PossibleCommands.Add:
+                        string toppingDetails = Regex.Match(command, @"(?i)(?<=Add).*").ToString().Trim();
+                        if (Regex.Match(toppingDetails, @"\d$").Success)
+                        {
+                            string toppingName = Regex.Match(toppingDetails, @".*\D(?=-?\d+$)").Value.Trim();
+                            string quantityAsString = Regex.Match(toppingDetails, @"-?\d+$").Value;
+                            int quantity = int.Parse(quantityAsString);
+                            currentOrder.AddTopping(toppingName, quantity);
+                        }
+                        else
+                        {
+                            currentOrder.AddTopping(toppingDetails);
+                        }
+                        break;
+                    case PossibleCommands.Quit:
+                        Environment.Exit(0);
+                        break;
+                    case PossibleCommands.ShowCommands:
+                        PrintPossibleCommands();
+                        break;
                 }
-                else
-                {
-                    Console.WriteLine("Ending an empty order. This has no effect.");
-                }
-            }
-            else if (command.StartsWith("Order "))
-            {
-                string productName = string.Join(" ", command.Split(' ').Skip(1));
-                currentOrder.OrderProduct(productName);
-            }
-            else if (command.StartsWith("Add "))
-            {
-                string toppingDetails = string.Join(" ", command.Split(' ').Skip(1));
-                try
-                {
-                    int quantity = int.Parse(toppingDetails.Split(' ').Last());
-                    string toppingName = string.Join(" ", toppingDetails.Split(' ').Reverse().Skip(1).Reverse());
-                    currentOrder.AddTopping(toppingName, quantity);
-                }
-                // Quantity = 1 and wasn't written - impossible to parse the string to int.
-                catch (FormatException)
-                {
-                    currentOrder.AddTopping(toppingDetails);
-                }
-            }
-            else if (command == "Quit")
-            {
-                Environment.Exit(0);
-            }
-            else if (command == "ShowCommands")
-            {
-                Console.WriteLine(possibleCommands);
             }
             else
             {
-                Console.WriteLine("Unknown Command");
-            }   
+                Console.WriteLine(UNKNOWN);
             }
         }
+        private string CommandDetails(string command)
+        {
+            PossibleCommands commandName = (PossibleCommands)Enum.Parse(typeof(PossibleCommands), command, ignoreCase: true);
+            switch (commandName)
+            {
+                case PossibleCommands.Order:
+                    return "Order [productName]";
+                case PossibleCommands.Add:
+                    return "Add [toppingName] [quantity = 1]";
+                case PossibleCommands.Quit:
+                    return "\nCommand to end the program: Quit";
+                case PossibleCommands.ShowCommands:
+                    return "\nCommand to show possible commands: ShowCommands";
+                default:
+                    return command;
+            }
+        }
+        private string FirstWordOfCommand(string command) => Regex.Match(command.Trim(), @"^\S+").Value;
+        private void PrintPossibleCommands()
+        {
+            Console.WriteLine("Possible Commands: " +
+                string.Join(", ", Enum.GetNames(typeof(PossibleCommands)).Select(CommandDetails)));
+        }
+        private enum PossibleCommands { ShowMenu, ShowOrder, EndOrder, Order, Add, Quit, ShowCommands }
     }
+}

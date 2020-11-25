@@ -5,144 +5,114 @@ namespace VendingDP.Lib
 {
     public class Menu : MenuLoader
     {
+        private readonly ErrorHandler errorHandler = new ErrorHandler();
         public Menu()
         {
             Validate();
         }
 
-        // Check whether the menu products are written correctly. If not, throw relevant exceptions.
-        public static void Validate()
+        public void Validate()
         {
-            IEnumerable<List<object>> wrongCategoryToppings = WrongCategoryToppings();
-            ErrorHandler.InvalidMenuItems(wrongCategoryToppings);
+            CheckDataCollections();
+            IEnumerable<string> wrongCategoryToppings = WrongCategoryToppings();
+            errorHandler.InvalidMenuItems(wrongCategoryToppings, "toppings");
 
-            IEnumerable<KeyValuePair<string, List<object>>> wrongTypeCombinations = WronglyWrittenPreparedCombinations();
-            ErrorHandler.InvalidMenuItems(wrongTypeCombinations.Cast<object>());
+            IEnumerable<string> wrongTypeCombinations = WronglyWrittenPreparedCombinations();
+            errorHandler.InvalidMenuItems(wrongTypeCombinations, "prepared combinations");
         }
 
-        // No topping should belong to a product category no basic product belongs to.
-        private static IEnumerable<List<object>> WrongCategoryToppings()
+        private void CheckDataCollections()
         {
-            IEnumerable<string> basicProductCategoryNames = basicProducts
-                .Select(productDetails => (string)productDetails[(int)ItemDetailColumns.ProductCategory])
-                .Distinct();
-            IEnumerable<List<object>> wrongCategoryToppings = toppings
-                .Where(
-                productDetails => !basicProductCategoryNames.Contains((string)productDetails[(int)ItemDetailColumns.ProductCategory]));
+            errorHandler.IsDataCollectionEmpty(BasicProducts, "basic products");
+            errorHandler.IsDataCollectionEmpty(Toppings, "toppings");
+            errorHandler.IsDataCollectionEmpty(PreparedCombinations, "prepared combinations");
+        }
+
+        private IEnumerable<string> WrongCategoryToppings()
+        {
+            IEnumerable<string> validCategories = GetCategories();
+            IEnumerable<string> wrongCategoryToppings = Toppings
+                .Where(topping => !validCategories.Contains(topping.Category)).Select(topping => topping.Name);
             return wrongCategoryToppings;
         }
-        /* The prepared combinations should match the following format:
-             * (Known) List<object> {basic product name, topping1 name, topping1 quantity, topping2 name, topping2 quantity, ...}
-             * (length is odd, first item belongs to the basic product names, then each pair of items is with first item 
-             * belonging to the topping names and second item can be casted to int).
-             */
-        private static IEnumerable<KeyValuePair<string, List<object>>> WronglyWrittenPreparedCombinations()
+
+        private IEnumerable<string> WronglyWrittenPreparedCombinations() => PreparedCombinations
+            .Where(rawPreparedCombination => !ValidateCombinatedProduct(rawPreparedCombination))
+            .Select(combination => combination.Name);
+
+        private bool ValidateCombinatedProduct(RawPreparedCombination combinatedProduct)
         {
-            IEnumerable<string> basicProductNames = basicProducts
-               .Select(productDetails => (string)productDetails[(int)ItemDetailColumns.Name]);
-            IEnumerable<string> toppingNames = toppings
-                .Select(productDetails => (string)productDetails[(int)ItemDetailColumns.Name]);
-            IEnumerable<KeyValuePair<string, List<object>>> wrongTypeCombinations = preparedCombinations
-                .Where(preparedCombination =>
-                !IsCombinatedProductToppingsOK(preparedCombination.Value, toppingNames, basicProductNames));
-            return wrongTypeCombinations;
-        }
-        private static bool IsCombinatedProductToppingsOK(
-            List<object> combinatedProduct, IEnumerable<string> toppingNames, IEnumerable<string> basicProductNames)
-        {
-            if (!(combinatedProduct.Count() % 2 == 1 &&
-                basicProductNames.Contains((string)combinatedProduct[0])))
-            {
-                return false;
-            }
-            for (int instruction = 0; instruction < combinatedProduct.Count() / 2; instruction++)
-            {
-                if (!toppingNames.Contains((string)combinatedProduct[2 * instruction + 1]))
-                {
-                    return false;
-                }
-                if (!(combinatedProduct[2 * instruction + 2] is int))
-                {
-                    return false;
-                }
-            }
-            return true;
+            bool isFirstBasicProduct = BasicProducts.Select(basicProduct => basicProduct.Name).Contains(combinatedProduct.BasicProductName);
+            IEnumerable<string> toppingNames = Toppings.Select(topping => topping.Name);
+            bool areRestToppings = combinatedProduct.Toppings.All(toppingName => toppingNames.Contains(toppingName));
+            return isFirstBasicProduct && areRestToppings;
         }
 
-        /* ItemsToCategories: key=category, value=dictionary with keys "Basic Products" and "Toppings"
-         * and values which are the lists of items belonging to the category.
-         */
-        private Dictionary<string, Dictionary<string, List<object>>> ItemsToCategories()
+        private Dictionary<string, Dictionary<string, List<Item>>> ItemsToCategories()
         {
-            Dictionary<string, Dictionary<string, List<object>>> itemsToCategories = new Dictionary<string, Dictionary<string, List<object>>>();
-            IEnumerable<string> categories = basicProducts
-                .Select(basicProduct => (string)basicProduct[(int)ItemDetailColumns.ProductCategory]).Distinct();
+            Dictionary<string, Dictionary<string, List<Item>>> itemsToCategories = new Dictionary<string, Dictionary<string, List<Item>>>();
+            IEnumerable<string> categories = GetCategories();
             foreach (string category in categories)
             {
-                itemsToCategories.Add(category, new Dictionary<string, List<object>>()
+                itemsToCategories.Add(category, new Dictionary<string, List<Item>>()
                 {
-                    ["Basic Products"] = new List<object>(),
-                    ["Toppings"] = new List<object>()
-                }) ; 
+                    ["Basic Products"] = new List<Item>(),
+                    ["Toppings"] = new List<Item>()
+                });
             }
-            foreach (List<object> basicProduct in basicProducts)
+            foreach (Item basicProduct in BasicProducts)
             {
-                itemsToCategories[(string)basicProduct[(int)ItemDetailColumns.ProductCategory]]
-                    ["Basic Products"].Add(basicProduct);
+                itemsToCategories[basicProduct.Category]["Basic Products"].Add(basicProduct);
             }
-            foreach (List<object> topping in toppings)
+            foreach (Item topping in Toppings)
             {
-                itemsToCategories[(string)topping[(int)ItemDetailColumns.ProductCategory]]
-                    ["Toppings"].Add(topping);
+                itemsToCategories[topping.Category]["Toppings"].Add(topping);
             }
             return itemsToCategories;
         }
 
-        private int GetLongestBasicProductName() =>
-            basicProducts.Concat(toppings)
-                .Select(productDetails => ((string)productDetails[(int)ItemDetailColumns.Name]).Length).Max();
+        private IEnumerable<string> GetCategories() => BasicProducts.Select(basicProduct => basicProduct.Category).Distinct();
 
-        private string SpecificListOfProductsDetails(List<object> productsGroup, int nameLength)
+        private int GetLongestBasicProductName() =>
+            BasicProducts.Concat(Toppings).Select(item => item.Name.Length).Max();
+
+        private string SpecificListOfProductsDetails(IEnumerable<Item> productsGroup, int nameLength)
         {
             string productsDetails = "";
-            foreach (List<object> productDetails in productsGroup)
+            foreach (Item productDetails in productsGroup)
             {
-                productsDetails += "\n * * " 
-                    + ((string)productDetails[(int)ItemDetailColumns.Name]).PadRight(nameLength) 
-                + " ---------- " 
-                + ((float)productDetails[(int)ItemDetailColumns.Price]).ToString() + " $";
+                productsDetails += "\n * * " + productDetails.Name.PadRight(nameLength)
+                + " ---------- " + productDetails.Price.ToString() + " $";
             }
             return productsDetails;
         }
-        private string PreparedCombinationPrinter(KeyValuePair<string, List<object>> preparedCombination)
+
+        private string PreparedCombinationPrinter(RawPreparedCombination rawPreparedCombination)
         {
-            string combinationDetails = $"\n{preparedCombination.Key} = {preparedCombination.Value[0]} + ";
-            string[] toppings = new string[preparedCombination.Value.Count() / 2];
-            for (int instruction = 0; instruction < preparedCombination.Value.Count() / 2; instruction++)
+            string combinationDetails = $"\n{rawPreparedCombination.Name} = {rawPreparedCombination.BasicProductName}";
+            IEnumerable<IGrouping<string, string>> toppingsByName = rawPreparedCombination.Toppings.GroupBy(topping => topping);
+            foreach (IGrouping<string, string> toppingGroup in toppingsByName)
             {
-                string toppingName = (string)preparedCombination.Value[2 * instruction + 1];
-                int quantity = (int)preparedCombination.Value[2 * instruction + 2];
-                toppings[instruction] += $"{quantity}x{toppingName}";
+                combinationDetails += $" + {toppingGroup.Count()} x {toppingGroup.Key}";
             }
-            combinationDetails += string.Join(" + ", toppings);
             return combinationDetails;
         }
         public override string ToString()
         {
             string menuMessage = "\n----- MENU -----\n";
-            Dictionary<string, Dictionary<string, List<object>>> itemsToCategories = ItemsToCategories();
+            Dictionary<string, Dictionary<string, List<Item>>> itemsToCategories = ItemsToCategories();
             int longestBasicProductName = GetLongestBasicProductName();
-            foreach (KeyValuePair<string, Dictionary<string, List<object>>> categoryAndItems in itemsToCategories)
+            foreach (KeyValuePair<string, Dictionary<string, List<Item>>> category in itemsToCategories)
             {
-                menuMessage += categoryAndItems.Key + ":\n * Basic Products:";
-                menuMessage += SpecificListOfProductsDetails(categoryAndItems.Value["Basic Products"], longestBasicProductName);
+                menuMessage += category.Key + ":\n * Basic Products:";
+                menuMessage += SpecificListOfProductsDetails(category.Value["Basic Products"], longestBasicProductName);
                 menuMessage += "\n * Toppings:";
-                menuMessage += SpecificListOfProductsDetails(categoryAndItems.Value["Toppings"], longestBasicProductName) + "\n";
+                menuMessage += SpecificListOfProductsDetails(category.Value["Toppings"], longestBasicProductName) + "\n";
             }
             menuMessage += "\nPrepared Combinations (Price - Do the Math):";
-            foreach (KeyValuePair<string, List<object>> preparedCombination in preparedCombinations)
+            foreach (RawPreparedCombination rawPreparedCombination in PreparedCombinations)
             {
-                menuMessage += PreparedCombinationPrinter(preparedCombination);
+                menuMessage += PreparedCombinationPrinter(rawPreparedCombination);
             }
             return menuMessage;
         }

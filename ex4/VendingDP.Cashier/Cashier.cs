@@ -7,15 +7,14 @@ namespace VendingDP.Cashier
     {
         static void Main()
         {
-            // Validate the products in the menu have correct names and formats (for future menu changes):
-            Order currentOrder = new Order() { Menu = new Menu().ToString() };
-            CommandExecutor Executor = new CommandExecutor();
-            Executor.Introduce();
+            Order currentOrder = new Order(menu: new Menu());
+            CommandExecutor executor = new CommandExecutor();
+            executor.Introduce();
             while (true)
             {
-                Console.Write("\n");
+                Console.WriteLine();
                 string command = Console.ReadLine();
-                Executor.Execute(command, ref currentOrder);
+                executor.Execute(command, ref currentOrder);
             }
         }
     }

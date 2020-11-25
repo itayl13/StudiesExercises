@@ -1,0 +1,99 @@
+{
+  "BasicProducts": [
+    {
+      "Name": "Coffee",
+      "Price": 5,
+      "Category": "Drinks"
+    },
+    {
+      "Name": "Chocolate",
+      "Price": 4,
+      "Category": "Drinks"
+    },
+    {
+      "Name": "White Bread",
+      "Price": 8,
+      "Category": "Sandwiches"
+    },
+    {
+      "Name": "Dark Bread",
+      "Price": 7,
+      "Category": "Sandwiches"
+    },
+    {
+      "Name": "Brown Bread",
+      "Price": 9,
+      "Category": "Sandwiches"
+    }
+  ],
+  "Toppings": [
+    {
+      "Name": "Milk",
+      "Price": 1,
+      "Category": "Drinks"
+    },
+    {
+      "Name": "Soy",
+      "Price": 1.5,
+      "Category": "Drinks"
+    },
+    {
+      "Name": "Cream",
+      "Price": 0.5,
+      "Category": "Drinks"
+    },
+    {
+      "Name": "Sugar",
+      "Price": 0.5,
+      "Category": "Drinks"
+    },
+    {
+      "Name": "Vegetables",
+      "Price": 2,
+      "Category": "Sandwiches"
+    },
+    {
+      "Name": "Egg Salad",
+      "Price": 3,
+      "Category": "Sandwiches"
+    },
+    {
+      "Name": "Yellow Cheese",
+      "Price": 2.5,
+      "Category": "Sandwiches"
+    }
+  ],
+
+  "PreparedCombinations": [
+    {
+      "Name": "Lactose Free Coffee",
+      "BasicProductName": "Coffee",
+      "Toppings": [ "Soy", "Sugar", "Sugar" ]
+    },
+    {
+      "Name": "Alpine Hot Cocoa",
+      "BasicProductName": "Chocolate",
+      "Toppings": [ "Milk", "Milk", "Cream", "Sugar" ]
+    },
+    {
+      "Name": "Latte",
+      "BasicProductName": "Coffee",
+      "Toppings": [ "Milk", "Milk" ]
+    },
+    {
+      "Name": "Gavnatz",
+      "BasicProductName": "White Bread",
+      "Toppings": [ "Yellow Cheese" ]
+    },
+    {
+      "Name": "Healthy",
+      "BasicProductName": "Dark Bread",
+      "Toppings": [ "Vegetables", "Vegetables" ]
+    },
+    {
+      "Name": "Wedding Sandwich",
+      "BasicProductName": "Brown Bread",
+      "Toppings": [ "Yellow Cheese", "Egg Salad", "Vegetables" ]
+    }
+  ]
+}
