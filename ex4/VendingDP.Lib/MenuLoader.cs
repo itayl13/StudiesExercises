@@ -15,6 +15,7 @@ namespace VendingDP.Lib
             Toppings = menuData.Toppings;
             PreparedCombinations = menuData.PreparedCombinations;
         }
+
         private StreamReader ReadFile()
         {
             AppSettingsReader reader = new AppSettingsReader();

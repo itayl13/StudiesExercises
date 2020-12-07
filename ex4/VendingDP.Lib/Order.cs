@@ -10,6 +10,7 @@ namespace VendingDP.Lib
         private readonly ErrorHandler errorHandler = new ErrorHandler();
         public float Price { get; set; }
         public Menu Menu { get; set; }
+
         public Order(Menu menu)
         {
             Menu = menu;
@@ -21,14 +22,17 @@ namespace VendingDP.Lib
             CombinatedProduct matchingProductInMaking = products
                 .Find(combinatedProduct => combinatedProduct.CombinatedProductStatus == CombinatedProductStatus.InMaking && 
                 combinatedProduct.basicProduct.Category == productCategory);
+
             if (matchingProductInMaking != null)
             {
                 matchingProductInMaking.CombinatedProductStatus = CombinatedProductStatus.Made;
             }
         }
+
         public void OrderProduct(string productName)
         {
             CombinatedProduct product = itemDetectors.DetectProduct(productName);
+
             if (product != null) 
             {
                 if (product.CombinatedProductStatus == CombinatedProductStatus.InMaking)
@@ -37,12 +41,12 @@ namespace VendingDP.Lib
                 }
                 products.Add(product);
                 Price += product.Price;
+                return;
             }
-            else
-            {
-                errorHandler.ItemNotFound(productName, "Product");
-            }
+            errorHandler.ItemNotFound(productName, "Product");
+            return;
         }
+
         public void AddTopping(string toppingName, int quantity = 1)
         {
             if (errorHandler.CheckToppingPositivity(quantity))
@@ -57,18 +61,16 @@ namespace VendingDP.Lib
                     {
                         productForTopping.AddTopping(topping, quantity);
                         Price += quantity * topping.Price;
+                        return;
                     }
-                    else
-                    {
-                        errorHandler.NoProductToAddToppingTo(toppingName);
-                    }
+                    errorHandler.NoProductToAddToppingTo(toppingName);
+                    return;
                 }
-                else
-                {
-                    errorHandler.ItemNotFound(toppingName, "Topping");
-                }
+                errorHandler.ItemNotFound(toppingName, "Topping");
+                return;
             }
         }
+
         public void EndOrder()
         {
             foreach (CombinatedProduct product in products)
@@ -76,6 +78,7 @@ namespace VendingDP.Lib
                 product.CombinatedProductStatus = CombinatedProductStatus.Made;
             }
         }
+
         public override string ToString() 
         {
             string message = "Current Order:\n";

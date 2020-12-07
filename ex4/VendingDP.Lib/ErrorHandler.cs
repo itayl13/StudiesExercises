@@ -15,6 +15,7 @@ namespace VendingDP.Lib
                 throw new InvalidDataException(message);
             }
         }
+
         public void InvalidMenuItems(IEnumerable<string> wrongToppings, string whatBeingTested)
         {
             if (wrongToppings.Count() >= 1)
@@ -26,14 +27,16 @@ namespace VendingDP.Lib
         
         private string MenuItemsMessage(IEnumerable<string> wrongItems, string whatBeingTested)
         {
+            string message = string.Join("\n", wrongItems);
+
             if (whatBeingTested == "toppings")
             {
-                string message = string.Join("\n", wrongItems);
+                
                 return "The following toppings belong to an unknown product category:\n" + message;
             }
+
             else 
             {
-                string message = string.Join("\n", wrongItems);
                 return "The following combinations have an incorrect form (wrong basic product or toppings):\n" + message;
             }
         }
@@ -47,19 +50,23 @@ namespace VendingDP.Lib
             }
             return true;
         }
+
         public void ItemNotFound(string itemName, string what)
         {
             string message;
+
             if (what == "Product")
             {
                 message = $"No product named {itemName} was found.";
             }
+
             else
             {
                 message = $"No topping named {itemName} was found (Maybe wrong typing format?).";
             }
             Console.WriteLine(message + $" {what} was not ordered.");
         }
+
         public void NoProductToAddToppingTo(string toppingName)
         {
             Console.WriteLine($"Topping {toppingName} cannot be added to any product in the order. Topping was not added");

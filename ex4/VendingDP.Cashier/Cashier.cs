@@ -10,6 +10,7 @@ namespace VendingDP.Cashier
             Order currentOrder = new Order(menu: new Menu());
             CommandExecutor executor = new CommandExecutor();
             executor.Introduce();
+
             while (true)
             {
                 Console.WriteLine();

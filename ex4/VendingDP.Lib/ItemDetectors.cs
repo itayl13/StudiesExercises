@@ -10,23 +10,19 @@ namespace VendingDP.Lib
         {
             productName = productName.Trim();
             RawPreparedCombination rawPreparedCombination = GetRawPreparedCombination(productName);
+
             if (rawPreparedCombination != null)
             {
                 return MakeCombinatedProduct(rawPreparedCombination);
             }
-            else
+            Item basicProduct = GetItem(productName, BasicProducts);
+
+            if (basicProduct != null)
             {
-                Item basicProduct = GetItem(productName, BasicProducts);
-                if (basicProduct != null)
-                {
-                    CombinatedProduct combinatedProduct = new CombinatedProduct(basicProduct, CombinatedProductStatus.InMaking);
-                    return combinatedProduct;
-                }
-                else
-                {
-                    return null;
-                }
+                CombinatedProduct combinatedProduct = new CombinatedProduct(basicProduct, CombinatedProductStatus.InMaking);
+                return combinatedProduct;
             }
+            return null;
         }
 
         private CombinatedProduct MakeCombinatedProduct(RawPreparedCombination rawPreparedCombination)

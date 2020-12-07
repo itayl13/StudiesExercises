@@ -6,6 +6,7 @@ namespace VendingDP.Lib
     public class Menu : MenuLoader
     {
         private readonly ErrorHandler errorHandler = new ErrorHandler();
+
         public Menu()
         {
             Validate();
@@ -30,7 +31,7 @@ namespace VendingDP.Lib
 
         private IEnumerable<string> WrongCategoryToppings()
         {
-            IEnumerable<string> validCategories = GetCategories();
+            IEnumerable<string> validCategories = BasicProducts.Select(basicProduct => basicProduct.Category).Distinct(); 
             IEnumerable<string> wrongCategoryToppings = Toppings
                 .Where(topping => !validCategories.Contains(topping.Category)).Select(topping => topping.Name);
             return wrongCategoryToppings;
@@ -48,30 +49,37 @@ namespace VendingDP.Lib
             return isFirstBasicProduct && areRestToppings;
         }
 
-        private Dictionary<string, Dictionary<string, List<Item>>> ItemsToCategories()
+        public override string ToString()
         {
-            Dictionary<string, Dictionary<string, List<Item>>> itemsToCategories = new Dictionary<string, Dictionary<string, List<Item>>>();
-            IEnumerable<string> categories = GetCategories();
-            foreach (string category in categories)
+            string menuMessage = "\n----- MENU -----\n";
+            IEnumerable<DataInSpecificCategory> itemsToCategories = ItemsToCategories();
+            int longestBasicProductName = GetLongestBasicProductName();
+
+            foreach (DataInSpecificCategory categoryAndData in itemsToCategories)
             {
-                itemsToCategories.Add(category, new Dictionary<string, List<Item>>()
-                {
-                    ["Basic Products"] = new List<Item>(),
-                    ["Toppings"] = new List<Item>()
-                });
+                menuMessage += categoryAndData.categoryName + ":\n * Basic Products:";
+                menuMessage += SpecificListOfProductsDetails(categoryAndData.basicProducts, longestBasicProductName);
+                menuMessage += "\n * Toppings:";
+                menuMessage += SpecificListOfProductsDetails(categoryAndData.toppings, longestBasicProductName) + "\n";
             }
-            foreach (Item basicProduct in BasicProducts)
+            menuMessage += "\nPrepared Combinations (Price - Do the Math):";
+
+            foreach (RawPreparedCombination rawPreparedCombination in PreparedCombinations)
             {
-                itemsToCategories[basicProduct.Category]["Basic Products"].Add(basicProduct);
+                menuMessage += PreparedCombinationPrinter(rawPreparedCombination);
             }
-            foreach (Item topping in Toppings)
-            {
-                itemsToCategories[topping.Category]["Toppings"].Add(topping);
-            }
-            return itemsToCategories;
+            return menuMessage;
         }
 
-        private IEnumerable<string> GetCategories() => BasicProducts.Select(basicProduct => basicProduct.Category).Distinct();
+        private IEnumerable<DataInSpecificCategory> ItemsToCategories()
+        {
+            IEnumerable<DataInSpecificCategory> itemsToCategories =
+                from basicProductsInCategory in BasicProducts.GroupBy(basicProduct => basicProduct.Category)
+                join toppingsInCategory in Toppings.GroupBy(topping => topping.Category)
+                on basicProductsInCategory.Key equals toppingsInCategory.Key
+                select new DataInSpecificCategory(basicProductsInCategory, toppingsInCategory);
+            return itemsToCategories;
+        }
 
         private int GetLongestBasicProductName() =>
             BasicProducts.Concat(Toppings).Select(item => item.Name.Length).Max();
@@ -79,6 +87,7 @@ namespace VendingDP.Lib
         private string SpecificListOfProductsDetails(IEnumerable<Item> productsGroup, int nameLength)
         {
             string productsDetails = "";
+
             foreach (Item productDetails in productsGroup)
             {
                 productsDetails += "\n * * " + productDetails.Name.PadRight(nameLength)
@@ -91,30 +100,12 @@ namespace VendingDP.Lib
         {
             string combinationDetails = $"\n{rawPreparedCombination.Name} = {rawPreparedCombination.BasicProductName}";
             IEnumerable<IGrouping<string, string>> toppingsByName = rawPreparedCombination.Toppings.GroupBy(topping => topping);
+
             foreach (IGrouping<string, string> toppingGroup in toppingsByName)
             {
                 combinationDetails += $" + {toppingGroup.Count()} x {toppingGroup.Key}";
             }
             return combinationDetails;
-        }
-        public override string ToString()
-        {
-            string menuMessage = "\n----- MENU -----\n";
-            Dictionary<string, Dictionary<string, List<Item>>> itemsToCategories = ItemsToCategories();
-            int longestBasicProductName = GetLongestBasicProductName();
-            foreach (KeyValuePair<string, Dictionary<string, List<Item>>> category in itemsToCategories)
-            {
-                menuMessage += category.Key + ":\n * Basic Products:";
-                menuMessage += SpecificListOfProductsDetails(category.Value["Basic Products"], longestBasicProductName);
-                menuMessage += "\n * Toppings:";
-                menuMessage += SpecificListOfProductsDetails(category.Value["Toppings"], longestBasicProductName) + "\n";
-            }
-            menuMessage += "\nPrepared Combinations (Price - Do the Math):";
-            foreach (RawPreparedCombination rawPreparedCombination in PreparedCombinations)
-            {
-                menuMessage += PreparedCombinationPrinter(rawPreparedCombination);
-            }
-            return menuMessage;
         }
     }
 }
