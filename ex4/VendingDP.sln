@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VendingDP.Lib", "VendingDP.Lib\VendingDP.Lib.csproj", "{343E5AA7-9FA5-4A75-B49E-9BAE17633F13}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VendingDP.Cashier", "VendingDP.Cashier\VendingDP.Cashier.csproj", "{AA58EDCA-C746-49AD-942B-CCF71317EF69}"
+	ProjectSection(ProjectDependencies) = postProject
+		{343E5AA7-9FA5-4A75-B49E-9BAE17633F13} = {343E5AA7-9FA5-4A75-B49E-9BAE17633F13}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{343E5AA7-9FA5-4A75-B49E-9BAE17633F13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{343E5AA7-9FA5-4A75-B49E-9BAE17633F13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{343E5AA7-9FA5-4A75-B49E-9BAE17633F13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{343E5AA7-9FA5-4A75-B49E-9BAE17633F13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA58EDCA-C746-49AD-942B-CCF71317EF69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA58EDCA-C746-49AD-942B-CCF71317EF69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA58EDCA-C746-49AD-942B-CCF71317EF69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA58EDCA-C746-49AD-942B-CCF71317EF69}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {87D14865-640E-4557-8146-1ECD853CDB39}
+	EndGlobalSection
+EndGlobal
