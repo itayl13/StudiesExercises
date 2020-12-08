@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using VendingDP.Lib.Commands;
 
 namespace VendingDP.Lib
 {
@@ -8,7 +9,7 @@ namespace VendingDP.Lib
         public const string HELLO = "Hello! What would you like to order?";
         public const string UNKNOWN = "Unknown Command";
         public const string END_EMPTY_ORDER = "Ending an empty order. This has no effect.";
-        private readonly CommandSelector commandSelector = new CommandSelector();
+        private readonly CommandFactory commandSelector = new CommandFactory();
 
         public void Introduce()
         {
