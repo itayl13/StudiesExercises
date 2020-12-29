@@ -1,0 +1,6 @@
+﻿Move folder2 folder3\folder2
+GetStatus
+Move folder1\blabla1.txt folder4\blabla1.txt
+DeleteFile folder3\blabla3.txt
+GetLog
+Search bla ..\..\..\search_results.txt
