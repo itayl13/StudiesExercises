@@ -21,13 +21,11 @@ namespace FileSystemTPL.TPLOperations
                 {
                     DeleteFile(path);
                 }
-
                 else
                 {
                     DeleteDir(path);
                 }
             }
-
             finally
             {
                 executionManager.ReleasePath(path);

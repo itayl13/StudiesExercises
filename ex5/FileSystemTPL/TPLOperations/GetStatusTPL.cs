@@ -16,7 +16,6 @@ namespace FileSystemTPL.TPLOperations
                 PathStatus baseDirStats = GetPathStats(Program.DIRECTORY_PATH);
                 Console.WriteLine("\nCurrent Status:\n" + baseDirStats);
             }
-
             finally
             {
                 executionManager.ReleaseAllActions();

@@ -24,7 +24,6 @@ namespace FileSystemTPL.TPLOperations
                 DeleteChildDirs(dirPath);
                 basicOperations.DeleteDir(dirPath);
             }
-
             finally
             {
                 executionManager.ReleasePath(dirPath);

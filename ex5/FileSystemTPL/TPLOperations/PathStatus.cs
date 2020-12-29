@@ -39,7 +39,6 @@ namespace FileSystemTPL.TPLOperations
                 folderCountMutex.WaitOne();
                 FolderCount += childPathStats.FolderCount;
             }
-
             finally
             {
                 folderCountMutex.ReleaseMutex();
@@ -53,7 +52,6 @@ namespace FileSystemTPL.TPLOperations
                 fileCountMutex.WaitOne();
                 FileCount += childPathStats.FileCount;
             }
-
             finally
             {
                 fileCountMutex.ReleaseMutex();
@@ -71,7 +69,6 @@ namespace FileSystemTPL.TPLOperations
                     LargestFile = candidateStats;
                 }
             }
-
             finally
             {
                 LargestFileMutex.ReleaseMutex();
@@ -89,7 +86,6 @@ namespace FileSystemTPL.TPLOperations
                     OldestFile = candidateStats;
                 }
             }
-            
             finally
             {
                 OldestFileMutex.ReleaseMutex();

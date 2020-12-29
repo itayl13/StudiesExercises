@@ -20,14 +20,6 @@ namespace FileSystemTPL
             lastTenCommandsLog = new Queue<string>();
         }
 
-        public void LockPaths(ObjectInActionStatus actionStatus, params string[] paths)
-        {
-            foreach (string path in paths)
-            {
-                LockPath(path, actionStatus);
-            }
-        }
-
         public void LockPath(string path, ObjectInActionStatus actionStatus)
         {
             try
@@ -35,17 +27,10 @@ namespace FileSystemTPL
                 pathsInActionMutex.WaitOne();
                 pathsInAction.Add(path, actionStatus);
             }
-            
             finally
             {
                 pathsInActionMutex.ReleaseMutex();
             }
-        }
-
-        public void ReleasePaths(params string[] paths)
-        {
-            foreach (string path in paths)
-                ReleasePath(path);
         }
 
         public void ReleasePath(string path)
@@ -55,7 +40,6 @@ namespace FileSystemTPL
                 pathsInActionMutex.WaitOne();
                 pathsInAction.Remove(path);
             }
-
             finally
             { 
                 pathsInActionMutex.ReleaseMutex(); 
@@ -74,7 +58,6 @@ namespace FileSystemTPL
                 }
                 lastTenCommandsLog.Enqueue(commandDetails.CommandLogMessage());
             }
-
             finally
             {
                 ReleaseCommandsLog();
@@ -96,7 +79,6 @@ namespace FileSystemTPL
                 }
                 return ObjectInActionStatus.Free;
             }
-
             finally
             {
                 if (LockPathsInAction)

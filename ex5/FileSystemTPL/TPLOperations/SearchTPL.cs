@@ -23,7 +23,6 @@ namespace FileSystemTPL.TPLOperations
                 executionManager.LockPath(resultsFilePath, ObjectInActionStatus.SearchResults);
                 SearchInDir(Program.DIRECTORY_PATH);
             }
-
             finally
             {
                 resultsFile.Close();
@@ -66,7 +65,6 @@ namespace FileSystemTPL.TPLOperations
                     resultsFile.WriteLine(childFile);
                 }
             }
-
             finally
             {
                 executionManager.ReleaseAllActions();

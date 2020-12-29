@@ -16,7 +16,7 @@ namespace FileSystemTPL
         {
             FullCommand = command.Trim();
             
-            if (FullCommand == string.Empty)
+            if (string.IsNullOrEmpty(FullCommand))
             {
                 fileSystemCommand = FileSystemCommands.Empty;
                 return;

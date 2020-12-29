@@ -23,7 +23,6 @@ namespace FileSystemTPL
                 command.Execute();
                 success = true;
             }
-
             catch
             {
                 success = false;
@@ -42,8 +41,7 @@ namespace FileSystemTPL
                 FileSystemCommands.Search => new SearchTPL(commandDetails, executionManager),
                 FileSystemCommands.GetStatus => new GetStatusTPL(commandDetails, executionManager),
                 FileSystemCommands.GetLog => new GetLogTPL(commandDetails, executionManager),
-                FileSystemCommands.Quit => new QuitCode(commandDetails, executionManager),
-                _ => new QuitCode(commandDetails, executionManager),
+                _ => new GetStatusTPL(commandDetails, executionManager),
             };
         }
     }

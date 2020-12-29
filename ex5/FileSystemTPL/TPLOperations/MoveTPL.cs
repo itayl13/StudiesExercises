@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace FileSystemTPL.TPLOperations
 {
@@ -24,23 +25,20 @@ namespace FileSystemTPL.TPLOperations
             try
             {
                 executionManager.LockPath(source, ObjectInActionStatus.ToBeMoved);
-                
+
                 if (File.Exists(source))
                 {
                     return MoveFileTPL;
                 }
-
                 else if (Directory.Exists(source))
                 {
                     return MoveDirRecursively;
                 }
-
                 else
                 {
                     throw new FileNotFoundException($"The path {source} does not exist.");
                 }
             }
-
             finally
             {
                 executionManager.ReleasePath(source);
@@ -54,7 +52,6 @@ namespace FileSystemTPL.TPLOperations
                 executionManager.LockPath(destination, ObjectInActionStatus.MovingDestination);
                 basicOperations.MoveFile(source, destination);
             }
-
             finally
             {
                 executionManager.ReleasePath(destination);
@@ -63,6 +60,7 @@ namespace FileSystemTPL.TPLOperations
 
         private void MoveDirRecursively(string source, string destination)
         {
+            ValidateMovingIsPossible(source, destination);
             try
             {
                 executionManager.LockPath(destination, ObjectInActionStatus.MovingDestination);
@@ -71,10 +69,38 @@ namespace FileSystemTPL.TPLOperations
                 MoveChildDirs(source, destination);
                 DeleteSourceDir(source);
             }
-
             finally
             {
                 executionManager.ReleasePath(destination);
+            }
+        }
+
+        private void ValidateMovingIsPossible(string source, string destination)
+        {
+            DirectoryInfo sourceInfo = new DirectoryInfo(source.TrimEnd('\\'));
+            DirectoryInfo destinationInfo = new DirectoryInfo(destination.TrimEnd('\\'));
+            if (sourceInfo.FullName == destinationInfo.FullName)
+            {
+                throw new ArgumentException("The destination folder is the same as the source folder");
+            }
+            else
+            {
+                ValidateDestinationIsNotSubdirOfSource(sourceInfo, destinationInfo);
+            }
+        }
+
+        private void ValidateDestinationIsNotSubdirOfSource(DirectoryInfo sourceInfo, DirectoryInfo destinationInfo)
+        {
+            while (destinationInfo.Parent != null)
+            {
+                if (destinationInfo.Parent.FullName == sourceInfo.FullName)
+                {
+                    throw new ArgumentException("The destination folder is a subfolder of the source folder");
+                }
+                else
+                {
+                    destinationInfo = destinationInfo.Parent;
+                }
             }
         }
 

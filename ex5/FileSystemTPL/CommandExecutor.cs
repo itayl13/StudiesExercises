@@ -32,9 +32,9 @@ namespace FileSystemTPL
             Console.WriteLine("Enter path to commands file (Default: press enter).");
             string filePath = Console.ReadLine();
 
-            if (filePath.Trim() == string.Empty)
+            if (string.IsNullOrEmpty(filePath.Trim()))
             {
-                return @"..\..\..\commands.txt";
+                return Program.DEFAULT_COMMANDS_PATH;
             }
             return filePath;
         }

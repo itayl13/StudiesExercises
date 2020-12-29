@@ -4,8 +4,9 @@ namespace FileSystemTPL
 {
     class Program
     {
-        public const string DIRECTORY_PATH = "C:\\Users\\itayl\\OneDrive\\שולחן העבודה\\trial_folder";
+        public const string DIRECTORY_PATH = @"C:\Users\itayl\OneDrive\שולחן העבודה\trial_folder";
         public const int DELAY_MS = 1000;
+        public const string DEFAULT_COMMANDS_PATH = @"..\..\..\commands.txt";
 
         static void Main()
         {
@@ -21,7 +22,6 @@ namespace FileSystemTPL
                     commandExecutor.RunCommandsFromFile();
                     return;
                 }
-
                 else if (choice.Trim() == "2") 
                 {
                     commandExecutor.GetUserCommands();
